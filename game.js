@@ -1017,3 +1017,4 @@ drawBackground();
 document.title =
     GAME_SETTINGS.gameName;
 ```
+
