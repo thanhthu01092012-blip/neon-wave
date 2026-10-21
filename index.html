@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI SẼ LÀ NGƯỜI CHIẾN THẮNG</title>
+<style>
+:root{--gold:#ffd86b;--blue:#12276b;--line:#6ba8ff}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:#fff}
+body{min-height:100vh;background:#05091b}
+button{font:inherit}
+.screen{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;padding:24px}
+.screen[hidden]{display:none!important}
+.backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,5,26,.24),rgba(3,5,26,.55));z-index:1}
+.content{position:relative;z-index:2;width:min(100%,1000px);text-align:center}
+#intro .content{padding:24px 18px}
+h1{font-size:clamp(30px,5.5vw,64px);line-height:1.12;margin:0 auto 22px;color:var(--gold);text-shadow:0 3px 14px #000,0 0 18px #214fff;letter-spacing:1px}
+.tagline{font-size:clamp(15px,2vw,21px);text-shadow:0 2px 8px #000}
+.main-button{margin-top:24px;border:2px solid var(--gold);border-radius:32px;padding:14px 34px;background:linear-gradient(#174eaa,#10184f);color:#fff;font-weight:800;letter-spacing:1px;box-shadow:0 0 18px #267cff;cursor:pointer}
+.main-button:hover{filter:brightness(1.2)}
+#game .content{width:min(100%,1120px);padding:14px 12px}
+.game-layout{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:16px;align-items:stretch;text-align:left}
+.question-side{min-width:0;display:flex;flex-direction:column;justify-content:flex-end;min-height:min(78vh,720px)}
+.game-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:0 0 auto;padding:10px 14px;color:var(--gold);font-weight:800;text-shadow:0 2px 5px #000}
+.question-panel{background:linear-gradient(110deg,rgba(20,7,62,.96),rgba(13,24,84,.96));border:2px solid #9dbaff;border-radius:24px;padding:20px 24px;margin:12px 0 16px;box-shadow:0 0 16px #1767ff;text-align:center;font-size:clamp(18px,2.4vw,27px);line-height:1.4}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.answer{min-height:58px;padding:13px 16px;text-align:left;border:2px solid #6198ff;border-radius:28px;background:linear-gradient(110deg,rgba(9,25,81,.96),rgba(24,18,83,.96));color:#fff;cursor:pointer;line-height:1.3;box-shadow:0 2px 8px #0008}
+.answer:hover:not(:disabled){background:linear-gradient(110deg,#164cb2,#30217e)}
+.answer:disabled{cursor:default}
+.answer.correct{background:#087d49;border-color:#72ffb2}
+.answer.wrong{background:#a51f39;border-color:#ff8290}
+#feedback{min-height:30px;padding:12px;text-align:center;font-weight:800;color:var(--gold);text-shadow:0 2px 5px #000}
+.ladder{background:rgba(2,8,37,.86);border:1px solid #4d80ef;border-radius:14px;padding:12px 10px;align-self:center;width:100%;box-shadow:0 0 14px #0008}
+.ladder-title{text-align:center;color:var(--gold);font-weight:800;margin:4px 0 10px}
+.level{display:flex;justify-content:space-between;gap:8px;padding:6px 7px;border-radius:5px;font-size:13px;color:#f8d98a}
+.level.current{background:#e99b22;color:#fff;font-weight:900}
+.level.passed{color:#78ffba}
+#end .content{background:rgba(3,7,33,.72);border:1px solid #729dff;border-radius:22px;padding:28px 18px;max-width:720px}
+#effect{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:20px;background:rgba(0,0,12,.88);text-align:center}
+#effect h2{color:var(--gold);font-size:clamp(27px,5vw,48px);text-shadow:0 2px 12px #000}
+#effect img,#effect video{display:block;max-width:min(88vw,680px);max-height:65vh;object-fit:contain;border-radius:12px}
+.small{font-size:13px;color:#e0e7ff;text-shadow:0 2px 4px #000}
+@media(max-width:760px){
+ .screen{padding:12px}
+ .game-layout{grid-template-columns:1fr}
+ .question-side{min-height:auto}
+ .ladder{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:8px}
+ .ladder-title{grid-column:1/-1}
+ .level{font-size:11px;padding:5px 4px}
+ .answers{grid-template-columns:1fr}
+ .answer{min-height:52px}
+ .question-panel{padding:16px 14px}
+}
+</style>
+</head>
+<body>
+<section id="intro" class="screen">
+  <img class="backdrop" src="assets/image(10).png" alt="">
+  <div class="shade"></div>
+  <div class="content">
+    <h1>AI SẼ LÀ NGƯỜI CHIẾN THẮNG</h1>
+    <div class="tagline">Hãy sẵn sàng chinh phục 10 câu hỏi!</div>
+    <button id="introSoundButton" class="main-button">BẬT NHẠC MỞ ĐẦU</button>
+    <button id="startButton" class="main-button">BẮT ĐẦU TRÒ CHƠI</button>
+    <p class="small">Nếu nhạc chưa tự phát, bấm BẬT NHẠC MỞ ĐẦU trước. Khi sẵn sàng, bấm BẮT ĐẦU TRÒ CHƠI.</p>
+  </div>
+</section>
+
+<section id="game" class="screen" hidden>
+  <img class="backdrop" src="assets/image(20261021-120405).png" alt="">
+  <div class="shade"></div>
+  <div class="content">
+    <div class="game-layout">
+      <div class="question-side">
+        <div class="game-top"><span id="progress">CÂU 1 / 10</span><span id="score">ĐÚNG: 0</span></div>
+        <div id="question" class="question-panel"></div>
+        <div id="answers" class="answers"></div>
+        <div id="feedback" aria-live="polite"></div>
+      </div>
+      <aside class="ladder">
+        <div class="ladder-title">CÂU HỎI</div>
+        <div id="ladderLevels"></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section id="end" class="screen" hidden>
+  <img class="backdrop" src="assets/image(20261021-120405).png" alt="">
+  <div class="shade"></div>
+  <div class="content">
+    <h1 id="endTitle"></h1>
+    <p id="endText"></p>
+    <button class="main-button" id="restartButton">CHƠI LẠI</button>
+  </div>
+</section>
+
+<div id="effect" role="dialog" aria-live="assertive">
+  <h2 id="effectTitle"></h2>
+  <img id="effectImage" alt="" hidden>
+  <video id="effectVideo" playsinline hidden></video>
+</div>
+
+<!-- Giữ nguyên tên gốc của các tệp âm thanh/video bạn đã gửi.
+     Hãy đặt các tệp này trong thư mục assets sau khi tải chúng lên GitHub. -->
+<audio id="introMusic" src="assets/nhạc nền.mp4" loop preload="auto"></audio>
+<audio id="questionMusic" src="assets/câu trl.mp4" loop preload="auto"></audio>
+<video id="correctEffectA" src="assets/1000007135.mp4" playsinline preload="auto" hidden></video>
+<video id="correctEffectB" src="assets/1000007136.mp4" playsinline preload="auto" hidden></video>
+
+<script>
+const questions = [
+ {q:"Nghiệm của bất phương trình 5x+7>8x-5 là",a:["x<4","x>-4","x<1","x>-1"],correct:0},
+ {q:"Giải bất phương trình 4x-12<0:",a:["x<8","x>2","x>4","x<3"],correct:3},
+ {q:"Thơ Song thất Lục Bát gieo vần gì?",a:["Vần lưng","Vần chân","Không gieo vần","A và B đúng"],correct:3},
+ {q:"Có bao nhiêu cách chơi chữ thường gặp?",a:["5","6","7","4"],correct:1},
+ {q:"1 thang cuốn ở 1 trung tâm thương mại có thể nâng cùng lúc 12 người lên độ cao 4m trong thời gian 12s. Xem lực nâng của thang cuốn bằng với trọng lượng của vật cần nâng và khối lượng trung bình của mỗi người là 65kg. Tính công suất của thang cuốn ?",a:["3000W","2800W","2600W","2200W"],correct:2},
+ {q:"Có bao nhiêu ứng dụng của ethylene trong ngành công nghiệp sản xuất hóa chất và tổng hợp polymer.",a:["4","3","6","5"],correct:3},
+ {q:"Dầu mỏ có bao nhiêu lớp?",a:["3, dầu, khí, nước mặn","3, khí, dầu, nước mặn","3, nước mặn, dầu, khí","3, nước mặn, khí, dầu"],correct:1},
+ {q:"Một thang máy đưa người và  hàng hóa lên độ cao 80m thì sinh ra công A=160000 j. Biết người có khối lượng 60kg, tính khối lượng của hàng hóa ?",a:["200kg","120kg","140kg","180kg"],correct:2},
+ {q:"Chất lượng thông tin có bao nhiêu tiêu chí?",a:["5","7","6","4"],correct:3},
+ {q:"KOL là thuật ngữ viết tắt của Key Opinion Leader có nghĩa là người dẫn dắt dư luận chủ chốt hay người có ảnh hưởng. Khi em thấy 1 KOL quảng cáo sản phẩm trên mạng, em sẽ ứng xử thế nào ?",a:["Chia sẻ thông tin với người thân vì KOL là 1 nguồn tin đáng tin cậy.","Sử dụng sản phẩm vì KOL là một đảm bảo cho sản phẩm đã qua kiểm định.","Cân nhắc, đánh giá chất lượng thông tin trước khi sử dụng sản phẩm.","Không sử dụng và cảnh báo người thân về nguồn tin kém chất lượng."],correct:2}
+];
+
+const prizeLadder = ["500","1 000","2 000","3 000","5 000","10 000","15 000","25 000","50 000","100 000"];
+const $ = id => document.getElementById(id);
+let index = 0, score = 0, locked = false, effectTimer = null;
+const introMusic = $("introMusic"), questionMusic = $("questionMusic");
+const correctA = $("correctEffectA"), correctB = $("correctEffectB");
+
+function stop(media){try{media.pause();media.currentTime=0;}catch(e){}}
+function play(media, restart=true){
+  if(restart) try{media.currentTime=0;}catch(e){}
+  return media.play().catch(()=>{});
+}
+function stopQuestionMusic(){questionMusic.pause();}
+function buildLadder(){
+  $("ladderLevels").replaceChildren();
+  for(let i=prizeLadder.length-1;i>=0;i--){
+    const el=document.createElement("div");
+    el.className="level"+(i===index?" current":i<index?" passed":"");
+    el.textContent=`${i+1}  •  ${prizeLadder[i]}`;
+    $("ladderLevels").appendChild(el);
+  }
+}
+function startGame(){
+  stop(introMusic);
+  $("intro").hidden=true;
+  $("end").hidden=true;
+  $("game").hidden=false;
+  index=0;score=0;
+  showQuestion();
+  play(questionMusic);
+}
+function showQuestion(){
+  locked=false;
+  $("progress").textContent=`CÂU ${index+1} / ${questions.length}`;
+  $("score").textContent=`ĐÚNG: ${score}`;
+  $("question").textContent=questions[index].q;
+  $("feedback").textContent="";
+  $("answers").replaceChildren();
+  questions[index].a.forEach((value,i)=>{
+    const btn=document.createElement("button");
+    btn.className="answer";
+    btn.textContent=String.fromCharCode(65+i)+". "+value;
+    btn.addEventListener("click",()=>choose(i,btn));
+    $("answers").appendChild(btn);
+  });
+  buildLadder();
+}
+function showEffect(title, imagePath, videoElement, duration, onDone){
+  clearTimeout(effectTimer);
+  $("effectTitle").textContent=title;
+  const img=$("effectImage"), video=$("effectVideo");
+  img.hidden=true; video.hidden=true;
+  video.pause(); video.removeAttribute("src"); video.load();
+  $("effect").style.display="flex";
+  if(videoElement){
+    video.src=videoElement.currentSrc || videoElement.querySelector("source")?.src || videoElement.src;
+    video.hidden=false;
+    video.currentTime=0;
+    video.play().catch(()=>{video.hidden=true;});
+  }else if(imagePath){
+    img.src=imagePath;img.hidden=false;
+  }
+  effectTimer=setTimeout(()=>{
+    $("effect").style.display="none";
+    video.pause();
+    if(onDone)onDone();
+  },duration);
+}
+function hideEffect(){
+  clearTimeout(effectTimer);
+  $("effect").style.display="none";
+  $("effectVideo").pause();
+}
+function choose(answer, button){
+  if(locked)return;
+  locked=true;
+  const q=questions[index];
+  document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+  stopQuestionMusic();
+  if(answer!==q.correct){
+    button.classList.add("wrong");
+    $("feedback").textContent="RẤT TIẾC! BẠN ĐÃ TRẢ LỜI SAI.";
+    finish(false);
+    return;
+  }
+  button.classList.add("correct");
+  score++;
+  $("score").textContent=`ĐÚNG: ${score}`;
+  $("feedback").textContent="CHÍNH XÁC!";
+  if(index===questions.length-1){
+    finish(true);
+    return;
+  }
+  // Theo xác nhận của bạn, cả hai tệp MP4 này đều được gán cho hiệu ứng trả lời đúng.
+  // Phát tệp thứ nhất, rồi tệp thứ hai; giữ nguyên tệp gốc.
+  showEffect("CHÍNH XÁC!",null,correctA,2400,()=>{
+    showEffect("CHÍNH XÁC!",null,correctB,2400,()=>{
+      index++;
+      showQuestion();
+      play(questionMusic);
+    });
+  });
+}
+function finish(won){
+  stopQuestionMusic();
+  stop(introMusic);
+  $("game").hidden=true;
+  $("end").hidden=false;
+  if(won){
+    $("endTitle").textContent="CHÚC MỪNG CHIẾN THẮNG!";
+    $("endText").textContent=`Bạn đã trả lời đúng cả ${score} câu hỏi!`;
+    play(correctA);
+    showEffect("BẠN LÀ NGƯỜI CHIẾN THẮNG!",null,correctB,4500);
+  }else{
+    $("endTitle").textContent="TRÒ CHƠI KẾT THÚC!";
+    $("endText").textContent=`Bạn đã trả lời đúng ${score}/${questions.length} câu.`;
+    // Chưa có tệp sai được xác nhận riêng; không tự ý dùng tệp hiệu ứng đúng làm hiệu ứng sai.
+    showEffect("RẤT TIẾC! BẠN ĐÃ TRẢ LỜI SAI.", "assets/1000007137.jpg", null, 3500);
+  }
+}
+$("introSoundButton").addEventListener("click",()=>{
+  play(introMusic);
+});
+$("startButton").addEventListener("click",()=>{
+  // Dừng nhạc mở đầu rồi bắt đầu nhạc câu hỏi.
+  startGame();
+});
+$("restartButton").addEventListener("click",()=>{
+  hideEffect();stop(introMusic);stop(questionMusic);stop(correctA);stop(correctB);
+  $("end").hidden=true;$("intro").hidden=false;
+  play(introMusic);
+});
+</script>
+</body>
+</html>
